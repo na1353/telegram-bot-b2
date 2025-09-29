@@ -1,0 +1,15 @@
+{
+  "name": "telegram-bot-b2",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "backblaze-b2": "^1.6.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  }
+}
