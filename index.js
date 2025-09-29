@@ -30,7 +30,11 @@ async function getSignedUrl(filename) {
     validDurationInSeconds: 120,
   });
 
-  return `https://f003.backblazeb2.com/file/${bucketName}/${filename}?Authorization=${urlData.authorizationToken}`;
+    // لینک دانلود رو بر اساس downloadUrl بساز
+    const downloadUrl = auth.data.downloadUrl;
+    const directLink = `${downloadUrl}/file/${bucketName}/${filename}?Authorization=${urlData.data.authorizationToken}`;
+
+    return directLink;
 }
 
 // وقتی کاربر با لینک وارد ربات شود
