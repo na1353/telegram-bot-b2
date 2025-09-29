@@ -30,7 +30,7 @@ async function getSignedUrl(filename) {
     validDurationInSeconds: 120,
   });
 
-  return `https://f002.backblazeb2.com/file/${bucketName}/${filename}?Authorization=${urlData.authorizationToken}`;
+  return `https://f003.backblazeb2.com/file/${bucketName}/${filename}?Authorization=${urlData.authorizationToken}`;
 }
 
 // وقتی کاربر با لینک وارد ربات شود
