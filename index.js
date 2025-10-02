@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// ساخت ربات تلگرام
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 // اتصال به Backblaze B2
@@ -13,31 +14,33 @@ const b2 = new B2({
   applicationKey: process.env.B2_APP_KEY,
 });
 
-// تولید لینک زمان‌دار
+// تابع ساخت لینک زمان‌دار
 async function getSignedUrl(filename) {
+  // احراز هویت در B2
   await b2.authorize();
+
   const bucketName = process.env.B2_BUCKET_NAME;
 
   // پیدا کردن bucketId
   const { data } = await b2.listBuckets();
   const bucket = data.buckets.find((b) => b.bucketName === bucketName);
-  if (!bucket) throw new Error("Bucket not found!");
+  if (!bucket) throw new Error("❌ Bucket not found!");
 
-  // ساخت لینک زمان‌دار (اعتبار 2 دقیقه)
+  // گرفتن authorization برای دانلود (اعتبار 120 ثانیه)
   const { data: urlData } = await b2.getDownloadAuthorization({
     bucketId: bucket.bucketId,
     fileNamePrefix: filename,
     validDurationInSeconds: 120,
   });
 
-    // لینک دانلود رو بر اساس downloadUrl بساز
-    const downloadUrl = auth.data.downloadUrl;
-    const directLink = `${downloadUrl}/file/${bucketName}/${filename}?Authorization=${urlData.data.authorizationToken}`;
+  // لینک مستقیم بر اساس downloadUrl
+  const downloadUrl = b2.downloadUrl;
+  const directLink = `${downloadUrl}/file/${bucketName}/${filename}?Authorization=${urlData.authorizationToken}`;
 
-    return directLink;
+  return directLink;
 }
 
-// وقتی کاربر با لینک وارد ربات شود
+// وقتی کاربر با لینک وارد ربات میشه (/start filename)
 bot.onText(/\/start (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const filename = match[1]; // مثلاً video1.mp4
@@ -47,16 +50,19 @@ bot.onText(/\/start (.+)/, async (msg, match) => {
     await bot.sendMessage(chatId, `📥 لینک دانلود آماده است:\n${signedUrl}`);
   } catch (error) {
     console.error("❌ خطا در گرفتن لینک:", error.message);
-    await bot.sendMessage(chatId, "⚠️ خطا در ساخت لینک دانلود. لطفاً دوباره تلاش کنید.");
+    await bot.sendMessage(chatId, "⚠️ خطا در ساخت لینک دانلود. دوباره تلاش کنید.");
   }
 });
 
-// وقتی کاربر فقط /start بفرستد
+// وقتی فقط /start زده میشه
 bot.onText(/\/start$/, (msg) => {
-  bot.sendMessage(msg.chat.id, "سلام! روی لینک‌های موجود در کانال کلیک کنید تا لینک دانلود بسازم. 📌");
+  bot.sendMessage(
+    msg.chat.id,
+    "سلام 👋\nبرای دریافت لینک دانلود روی لینک‌های کانال کلیک کنید."
+  );
 });
 
-// سرور کوچک برای زنده ماندن در Replit
+// یک وب‌سرور کوچک برای Replit
 const app = express();
-app.get("/", (req, res) => res.send("Bot is running..."));
-app.listen(3000, () => console.log("✅ Web server running on port 3000"));
+app.get("/", (req, res) => res.send("✅ Bot is running..."));
+app.listen(3000, () => console.log("🌍 Web server running on port 3000"));
